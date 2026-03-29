@@ -12,67 +12,50 @@ Deploy to Hugging Face Spaces:
 """
 
 import gradio as gr
-from pathlib import Path
+import edge_tts
+import asyncio
 import tempfile
+import os
 
-# Use Edge TTS for demo (no model download required)
-from turkishvoice.core.piper_engine import EdgeTTSVoice
-
-# Global engine
-_engine = None
-
-
-def get_engine():
-    """Get Edge TTS engine."""
-    global _engine
-    if _engine is None:
-        _engine = EdgeTTSVoice(voice='emel')
-    return _engine
+# Voice options
+VOICES = {
+    "emel": "tr-TR-EmelNeural",
+    "ahmet": "tr-TR-AhmetNeural",
+}
 
 
-def synthesize_turkish(text: str, voice: str, speed: float):
-    """
-    Synthesize Turkish text to speech.
-
-    Args:
-        text: Turkish text input
-        voice: Voice selection (emel or ahmet)
-        speed: Speech speed (0.5-2.0)
-
-    Returns:
-        Tuple of (audio_file, status_message)
-    """
+async def synthesize_audio(text: str, voice: str, speed: float):
+    """Synthesize Turkish text to speech using Edge TTS."""
     if not text or not text.strip():
-        return None, "❌ Lütfen Türkçe metin girin."
+        return None, "Lütfen Türkçe metin girin."
 
     if len(text) > 5000:
-        return None, "❌ Metin çok uzun (max 5000 karakter)."
+        return None, "Metin çok uzun (max 5000 karakter)."
+
+    # Map voice name to Edge TTS voice
+    edge_voice = VOICES.get(voice, VOICES["emel"])
+
+    # Calculate rate change (speed 1.0 = +0%, speed 2.0 = +100%)
+    rate = int((speed - 1.0) * 100)
+    rate_str = f"+{rate}%" if rate >= 0 else f"{rate}%"
+
+    # Create temp file
+    output_file = tempfile.NamedTemporaryFile(suffix=".wav", delete=False).name
 
     try:
-        engine = get_engine()
+        # Use edge-tts to synthesize
+        communicate = edge_tts.Communicate(text, edge_voice, rate=rate_str)
+        await communicate.save(output_file)
 
-        # Switch voice if needed
-        if voice != engine.voice_name:
-            engine = EdgeTTSVoice(voice=voice)
+        duration = os.path.getsize(output_file) / (24000 * 2)  # Approximate
+        status = f"Başarılı! ({duration:.2f} saniye)"
 
-        # Synthesize
-        audio = engine.synthesize(text, speed=speed)
-
-        # Save to temp file
-        with tempfile.NamedTemporaryFile(suffix='.wav', delete=False) as f:
-            output_path = f.name
-
-        # Write WAV file
-        import soundfile as sf
-        sf.write(output_path, audio, 24000)
-
-        duration = len(audio) / 24000
-        status = f"✅ Başarılı! ({duration:.2f} saniye)"
-
-        return output_path, status
+        return output_file, status
 
     except Exception as e:
-        return None, f"❌ Hata: {str(e)}"
+        if os.path.exists(output_file):
+            os.remove(output_file)
+        return None, f"Hata: {str(e)}"
 
 
 def create_demo():
@@ -181,7 +164,7 @@ def create_demo():
 
         # Event handlers
         synthesize_btn.click(
-            fn=synthesize_turkish,
+            fn=synthesize_audio,
             inputs=[text_input, voice_dropdown, speed_slider],
             outputs=[audio_output, status_output],
         )
