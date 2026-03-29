@@ -1,157 +1,151 @@
-# TurkishVoice - Açık Kaynak Türkçe Metin-Şarkı Sentezi
+# 🇹🇷 TurkishVoice
 
-![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)
-![Python](https://img.shields.io/badge/Python-3.8+-green.svg)
-![Status](https://img.shields.io/badge/Status-Alpha-orange.svg)
+**Açık kaynaklı Türkçe Metin-Şarkı Sentezi (TTS)**
 
-> **TurkishVoice**, Türkçe metinleri doğal konuşma sesine dönüştürmek için geliştirilmiş açık kaynaklı bir Text-to-Speech (TTS) motorudur.
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 
-## 🔥 Özellikler
+## 🎮 Canlı Demo
 
-- **🏠 Türkçe Öncelikli**: Vowel harmony, stress marking, ve morphological analysis ile Türkçe'ye özel optimize
-- **🆓 Tamamen Açık Kaynak**: Apache 2.0 lisansı ile ücretsiz ve ticari kullanım serbest
-- **🖥️ CPU-Optimized**: NVIDIA GPU gerektirmez, ONNX ile Intel/AMD CPU'larda verimli çalışır
-- **🎭 Voice Cloning**: 10-30 saniye referans ses ile kendi sesinizi oluşturun
-- **📦 Çoklu Arayüz**: Python API, CLI, REST API ve Web UI
-- **🌐 Çok Dilli Temel**: Mevcut Coqui/Piper altyapısı üzerine inşa edilmiş
+**[https://huggingface.co/spaces/ayzek/TurkishVoice](https://huggingface.co/spaces/ayzek/TurkishVoice)**
 
-## 📦 Kurulum
+Demo üzerinden hemen test edebilirsiniz - kurulum gerekmez!
 
-### pip ile (Tavsiye Edilen)
+---
+
+## ✨ Özellikler
+
+| Özellik | TurkishVoice | Google TTS | Azure TTS |
+|---------|-------------|------------|-----------|
+| **Türkçe Ünlü Uyumu** | ✅ | ❌ | ❌ |
+| **G2P Dönüşüm** | ✅ | ❌ | ❌ |
+| **Vurgu Marker** | ✅ | ❌ | ❌ |
+| **Offline Mode** | ✅ | ❌ | ❌ |
+| **Voice Cloning** | ✅ | ✅ ($$$) | ✅ ($$$) |
+| **Açık Kaynak** | ✅ | ❌ | ❌ |
+| **Ücretsiz** | ✅ | ❌ | ❌ |
+
+---
+
+## 🚀 Hızlı Başlangıç
+
+### Kurulum
 
 ```bash
 pip install turkishvoice
 ```
 
-### Kaynaktan Derleme
-
-```bash
-git clone https://github.com/turkishvoice/turkishvoice.git
-cd turkishvoice
-pip install -e .
-```
-
-### Sistem Gereksinimleri
-
-- Python 3.8+
-- 8 GB RAM (minimum), 16 GB önerilen
-- Intel i5/i7 veya eşdeğer CPU (veya NVIDIA GPU)
-
-## 🚀 Hızlı Başlangıç
-
-### Python API
+### Kullanım
 
 ```python
-from turkishvoice import TurkishVoice
+from turkishvoice import TurkishVoiceEngine
 
-# Motoru başlat
-tts = TurkishVoice()
+# Edge TTS ile (online, yüksek kalite)
+engine = TurkishVoiceEngine(voice='emel', use_edge=True)
+audio = engine.synthesize("Merhaba dünya!")
+engine.save(audio, "output.wav")
 
-# Sentezle
-audio = tts.synthesize("Merhaba, ben TurkishVoice!")
-tts.save(audio, "merhaba.wav")
+# Piper TTS ile (offline, hızlı)
+engine = TurkishVoiceEngine(voice='dfki', use_piper=True)
+audio = engine.synthesize("Merhaba dünya!")
 ```
 
 ### CLI
 
 ```bash
-# Basit sentez
-turkishvoice synthesize "Günaydın Türkiye" -o output.wav
+# Sentez yap
+turkishvoice synthesize "Merhaba dünya!" -o output.wav --voice emel
 
-# Farklı ses ile
-turkishvoice synthesize "Merhaba" -o merhaba.wav --voice erkek
+# Sesleri listele
+turkishvoice voices
 
-# Mevcut sesleri listele
-turkishvoice voices --list
-
-# Web UI başlat
+# API sunucusu başlat
 turkishvoice serve
 ```
 
-### Web UI
+---
 
-```bash
-turkishvoice serve
-# http://localhost:7860 adresinde açılır
-```
+## 🎯 Kullanım Senaryoları
+
+### 1. Erişilebilirlik
+Görme engelliler için web sitelerini, belgeleri sesli hale getirin.
+
+### 2. İçerik Üretimi
+YouTube, TikTok videoları için otomatik seslendirme.
+
+### 3. Eğitim
+Ders materyallerini, kitapları sesli hale getirin.
+
+### 4. Call Center / IVR
+Telefon sistemleri için Türkçe otomatik yanıt.
+
+---
+
+## 🎙️ Sesler
+
+### Edge TTS (Online - Yüksek Kalite)
+
+| ID | İsim | Cinsiyet |
+|----|------|----------|
+| `emel` | Emel | Kadın |
+| `ahmet` | Ahmet | Erkek |
+
+### Piper TTS (Offline - Hızlı)
+
+| ID | İsim |
+|----|------|
+| `dfki` | DFKI |
+
+---
+
+## 🔧 API
 
 ### REST API
 
 ```bash
-# API sunucu başlat
-turkishvoice serve --api
+# Sunucuyu başlat
+turkishvoice serve --port 8000
 
-# Sentez isteği
-curl -X POST http://localhost:8000/api/v1/synthesize \
+# Sentez yap
+curl -X POST "http://localhost:8000/api/v1/synthesize" \
   -H "Content-Type: application/json" \
-  -d '{"text": "Merhaba", "voice": "default"}'
+  -d '{"text":"Merhaba","voice":"emel"}' \
+  -o output.wav
 ```
-
-## 🎯 Desteklenen Diller
-
-- **Ana Dil**: Türkçe (tr-TR)
-- **Deneysel**: İngilizce (en-US), Almanca (de-DE)
-
-## 📁 Proje Yapısı
-
-```
-turkishvoice/
-├── turkishvoice/           # Ana Python paketi
-│   ├── core/               # TTS motoru
-│   ├── turkish/            # Türkçe işleme (vowel harmony, G2P, stress)
-│   ├── api/                # FastAPI REST API
-│   ├── cli/                # CLI aracı
-│   └── utils/              # Yardımcı fonksiyonlar
-├── webui/                  # Gradio Web UI
-├── training/               # Eğitim scriptleri
-├── tests/                  # Testler
-└── models/                 # Ön-eğitimli ses modelleri
-```
-
-## 🔧 Türkçe İşleme Pipeline
-
-```
-Metin → Normalizasyon → Morphological Analiz → G2P → Vowel Harmony → Stress → Prosody → Fonem Dizisi
-```
-
-TurkishVoice, Türkçe'nin benzersiz dilbilgisel özelliklerini işlemek için özel olarak tasarlanmış bir pipeline kullanır:
-
-- **Vowel Harmony**: Suffix ünlüleri önceki ünlü ile uyumlu hale getirir (a/ı/o/u ↔ e/i/ö/ü)
-- **G2P**: Türkçe grafemlerini IPA fonemlerine dönüştürür (ç→tʃ, ş→ʃ, ğ→ː)
-- **Stress Marking**: Türkçe'nin sözcüksel vurgu kurallarını uygular
-- **Prosody Prediction**: Doğal konuşma için pitch ve duration tahmini
-
-## 🤝 Katkıda Bulunma
-
-Katkıda bulunmak için lütfen [CONTRIBUTING.md](CONTRIBUTING.md) dosyasını okuyun.
-
-```bash
-# Fork edin
-# Değişikliklerinizi yapın
-# Test edin
-pytest tests/
-
-# PR açın
-```
-
-## 📜 Lisans
-
-Bu proje Apache License 2.0 ile lisanslanmıştır. Detaylar için [LICENSE](LICENSE) dosyasına bakın.
-
-## 🙏 Teşekkürler
-
-Bu proje aşağıdaki açık kaynak projelerden ilham almıştır:
-
-- [Coqui TTS](https://github.com/idiap/coqui-ai-TTS) - XTTS-v2 mimarisi
-- [Piper TTS](https://github.com/rhasspy/piper) - ONNX optimizasyonu
-- [Bark](https://github.com/suno-ai/bark) - Transform tabanlı TTS
-- [Zemberek-NLP](https://github.com/ahmetaa/zemberek-nlp) - Türkçe NLP
-
-## 📬 İletişim
-
-- GitHub Issues: [turkishvoice/turkishvoice/issues](https://github.com/turkishvoice/turkishvoice/issues)
-- Discord: [TurkishVoice Community](https://discord.gg/turkishvoice)
 
 ---
 
-**⭐ Bu projeyi beğendiyseniz, yıldız vermeyi unutmayın!**
+## 📦 Bağımlılıklar
+
+```toml
+# Temel
+numpy>=1.21.0
+soundfile>=0.12.0
+edge-tts>=6.1.0
+
+# Opsiyonel
+piper-tts>=1.2.0        # Offline TTS
+coqui-tts>=0.22.0       # Voice cloning
+gradio>=4.0.0           # Web UI
+```
+
+---
+
+## 🛠️ Geliştirme
+
+```bash
+git clone https://github.com/ayzekhdawy/TurkishVoice
+cd TurkishVoice
+pip install -e ".[all]"
+pytest tests/
+```
+
+---
+
+## 📄 Lisans
+
+Apache 2.0 - Ticari kullanım serbest.
+
+---
+
+Made with ❤️ for the Turkish community
