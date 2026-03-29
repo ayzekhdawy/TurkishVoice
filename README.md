@@ -821,10 +821,7 @@ pre-commit install
 
 ### Topluluk Linkleri
 
-- [💬 Discord Sunucusu](https://discord.gg/turkishvoice)
-- [📧 E-posta Listesi](https://groups.google.com/g/turkishvoice)
-- [🐦 Twitter](https://twitter.com/turkishvoice)
-- [📺 YouTube](https://youtube.com/@turkishvoice)
+- [🐦 Twitter](https://x.com/ayzekdiolar)
 
 ### Star History
 
